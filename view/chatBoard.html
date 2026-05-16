@@ -183,7 +183,7 @@
     <div class="chat-body" id="chatBody">
 
       <div class="message received">
-        Hey everyone 👋
+        Hey everyone 
         <span class="timestamp">10:12 AM</span>
       </div>
 
@@ -198,13 +198,11 @@
       </div>
 
       <div class="message sent">
-        Nice! Looks awesome already 😎
+        Nice! Looks awesome already
         <span class="timestamp">10:15 AM</span>
       </div>
 
     </div>
-
-    <!-- Footer -->
 
     <form class="chat-footer" id="chatForm">
 
@@ -217,48 +215,110 @@
     </form>
 
   </div>
-
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script>
 
-    const chatForm = document.getElementById("chatForm");
-    const chatBody = document.getElementById("chatBody");
-    const messageInput = document.getElementById("messageInput");
+window.addEventListener("DOMContentLoaded", () => {
 
-    chatForm.addEventListener("submit", (e) => {
+  const API_BASE_URL = "http://localhost:4000";
 
-      e.preventDefault();
+  const token = localStorage.getItem("token");
+
+  const chatForm = document.getElementById("chatForm");
+  const chatBody = document.getElementById("chatBody");
+  const messageInput = document.getElementById("messageInput");
+
+  loadMessages();-
+
+  chatForm.addEventListener("submit", async (e) => {
+
+    e.preventDefault();
+
+    try {
 
       const message = messageInput.value.trim();
 
-      if(message === "") return;
+      if (message === "") return;
 
-      // current time
-      const time = new Date().toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit'
-      });
+      const payload = {
+        message
+      };
 
-      // create message div
-      const messageDiv = document.createElement("div");
-
-      messageDiv.classList.add("message", "sent");
-
-      messageDiv.innerHTML = `
-        ${message}
-        <span class="timestamp">${time} ✓</span>
-      `;
-
-      chatBody.appendChild(messageDiv);
-
-      // clear input
+      const response = await axios.post(
+        `${API_BASE_URL}/chat-app/chat-add`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
       messageInput.value = "";
 
-      // auto scroll
+      loadMessages();
+
+    } catch (err) {
+
+      console.log(err);
+
+      alert(
+        err.response?.data?.message || "Failed to send message"
+      );
+    }
+
+  });
+
+  async function loadMessages() {
+
+    try {
+
+      const response = await axios.get(
+        `${API_BASE_URL}/chat-app/get-chats`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      const allmsg = response.data.data;
+
+      chatBody.innerHTML = "";
+
+      allmsg.forEach((msg) => {
+
+        const messageDiv = document.createElement("div");
+
+        messageDiv.classList.add("message", "sent");
+
+        const time = new Date(msg.createdAt)
+          .toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+
+        messageDiv.innerHTML = `
+          ${msg.chat_msg}
+
+          <div class="message-info">
+            <span class="timestamp">${time} ✓✓</span>
+          </div>
+        `;
+
+        chatBody.appendChild(messageDiv);
+
+      });
+
+      // auto scroll bottom
       chatBody.scrollTop = chatBody.scrollHeight;
 
-    });
+    } catch (err) {
 
-  </script>
+      console.log(err);
 
+    }
+  }
+});
+</script>
 </body>
 </html>
