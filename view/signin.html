@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Group Chat Signup</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Page</title>
 
   <style>
     *{
@@ -12,26 +12,29 @@
       box-sizing:border-box;
       font-family: Arial, sans-serif;
     }
-  html {
+    html {
   scroll-behavior: smooth;
   }
+   .error{
+    color: brown;
+   }
     body{
       height:100vh;
       display:flex;
       justify-content:center;
       align-items:center;
-      background: linear-gradient(135deg, #4facfe, #00f2fe);
+      background: linear-gradient(135deg, #667eea, #764ba2);
     }
 
-    .signup-container{
+    .login-container{
       width:350px;
-      background:#fff;
+      background:white;
       padding:30px;
       border-radius:15px;
       box-shadow:0 10px 25px rgba(0,0,0,0.2);
     }
 
-    .signup-container h2{
+    .login-container h2{
       text-align:center;
       margin-bottom:25px;
       color:#333;
@@ -58,124 +61,122 @@
     }
 
     .input-group input:focus{
-      border-color:#4facfe;
-      box-shadow:0 0 5px rgba(79,172,254,0.5);
+      border-color:#667eea;
+      box-shadow:0 0 5px rgba(102,126,234,0.5);
     }
 
-    .signup-btn{
+    .login-btn{
       width:100%;
       padding:12px;
       border:none;
       border-radius:8px;
-      background:#4facfe;
+      background:#667eea;
       color:white;
       font-size:16px;
       cursor:pointer;
       transition:0.3s;
     }
 
-    .signup-btn:hover{
-      background:#2196f3;
+    .login-btn:hover{
+      background:#5a67d8;
     }
 
-    .login-link{
-      text-align:center;
+    .extra-links{
       margin-top:15px;
+      text-align:center;
       font-size:14px;
     }
 
-    .login-link a{
+    .extra-links a{
       text-decoration:none;
-      color:#2196f3;
+      color:#667eea;
       font-weight:bold;
     }
   </style>
 </head>
 <body>
 
-  <div class="signup-container">
-    <h2>Group Chat Signup</h2>
+  <div class="login-container">
+    <h2>Group Chat Login</h2>
 
-    <form id="signup">
-      <div class="input-group">
-        <label>Full Name</label>
-        <input type="text" id="txtname" name="name" placeholder="Enter your name" required>
-      </div>
-
+    <form id="signin">
+      
       <div class="input-group">
         <label>Email</label>
-        <input type="email" id="txtemail" name="email" placeholder="Enter your email" required>
+        <input type="email" id="txtemail" placeholder="Enter your email">
+        <p class="error"></p>
       </div>
 
       <div class="input-group">
-        <label>Phone</label>
-        <input type="text" id="txtphone" name="phone" placeholder="Choose a phone" required>
+        <label>Phone Number</label>
+        <input type="tel" id="txtphone" placeholder="Enter your phone number">
+        <p class="error"></p>
       </div>
 
       <div class="input-group">
         <label>Password</label>
-        <input type="password" id="txtpassword" name="password" placeholder="Create password" required>
+        <input type="password" id="txtpassword" placeholder="Enter your password" required>
+        <p class="error"></p>
       </div>
 
-      <button type="submit" class="signup-btn">
-        Sign Up
+      <button type="submit" class="login-btn">
+        Login
       </button>
 
-      <div class="login-link">
-        Already have an account?
-        <a href="../view/signin.html">Login</a>
+      <div class="extra-links">
+        <p><a href="#">Forgot Password?</a></p>
+        <br>
+        <p>Don't have an account? <a href="../view/signup.html">Sign Up</a></p>
       </div>
+
     </form>
   </div>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
  <script>
 window.addEventListener("DOMContentLoaded", () => {
-
+  const error = document.querySelector(".error");
+  const signin = document.getElementById("signin");
   const API_BASE_URL = "http://localhost:4000";
-  const signup = document.getElementById("signup");
 
-  signup.addEventListener("submit", async (e) => {
-
+  signin.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     try {
 
-      const name = document.getElementById("txtname").value;
       const email = document.getElementById("txtemail").value;
       const phone = document.getElementById("txtphone").value;
       const password = document.getElementById("txtpassword").value;
 
-      if (!name || !email || !phone || !password) {
-        alert("All fields are required!");
-        return;
-      }
-
       const payload = {
-        name,
         email,
         phone,
         password
       };
 
       const response = await axios.post(
-        `${API_BASE_URL}/chat-app/signup`,
-        payload
+        `${API_BASE_URL}/chat-app/signin`,
+          payload
       );
 
       console.log(response.data);
 
-      const { message } = response.data;
+      const { token, user, message } = response.data;
 
-      alert(message || "Account Created");
+      if (!token || !user) {
+        alert("Invalid credentials!");
+        return;
+      }
+      alert(message || "Login successful");
 
-      window.location.href = "./signin.html";
+      localStorage.setItem("token", token);
+
+      window.location.href = "./chatBoard.html";
 
     } catch (err) {
-
       console.log(err);
 
       alert(
-        err.response?.data?.message || "Signup failed"
+        err.response?.data?.message || "Login failed"
       );
     }
 

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Group Chat UI</title>
+
+  <style>
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body{
+      height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      background:#111b21;
+    }
+
+    .chat-container{
+      width:420px;
+      height:90vh;
+      background:#0b141a;
+      border-radius:15px;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      box-shadow:0 0 20px rgba(0,0,0,0.5);
+    }
+
+    /* Header */
+
+    .chat-header{
+      height:70px;
+      background:#202c33;
+      display:flex;
+      align-items:center;
+      padding:0 20px;
+      color:white;
+      border-bottom:1px solid #2a3942;
+    }
+
+    .avatar{
+      width:45px;
+      height:45px;
+      border-radius:50%;
+      background:#25d366;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      font-weight:bold;
+      margin-right:15px;
+      color:white;
+    }
+
+    .chat-info h3{
+      font-size:17px;
+    }
+
+    .chat-info p{
+      font-size:12px;
+      color:#8696a0;
+      margin-top:3px;
+    }
+
+    /* Chat Messages */
+
+    .chat-body{
+      flex:1;
+      padding:20px;
+      overflow-y:auto;
+      scroll-behavior:smooth;
+      background:#0b141a;
+    }
+
+    .message{
+      max-width:75%;
+      padding:10px 14px;
+      margin-bottom:15px;
+      border-radius:10px;
+      position:relative;
+      line-height:1.4;
+      word-wrap:break-word;
+    }
+
+    .received{
+      background:#202c33;
+      color:white;
+      align-self:flex-start;
+      border-top-left-radius:2px;
+    }
+
+    .sent{
+      background:#005c4b;
+      color:white;
+      margin-left:auto;
+      border-top-right-radius:2px;
+    }
+
+    .timestamp{
+      display:block;
+      font-size:11px;
+      color:#c7d1d6;
+      margin-top:5px;
+      text-align:right;
+    }
+
+    /* Input Area */
+
+    .chat-footer{
+      height:70px;
+      background:#202c33;
+      display:flex;
+      align-items:center;
+      padding:10px;
+      gap:10px;
+      border-top:1px solid #2a3942;
+    }
+
+    .chat-footer input{
+      flex:1;
+      padding:12px 15px;
+      border:none;
+      outline:none;
+      border-radius:25px;
+      background:#2a3942;
+      color:white;
+      font-size:15px;
+    }
+
+    .chat-footer input::placeholder{
+      color:#8696a0;
+    }
+
+    .send-btn{
+      width:50px;
+      height:50px;
+      border:none;
+      border-radius:50%;
+      background:#25d366;
+      color:white;
+      font-size:18px;
+      cursor:pointer;
+      transition:0.3s;
+    }
+
+    .send-btn:hover{
+      background:#20bd5a;
+    }
+
+    /* Scrollbar */
+
+    .chat-body::-webkit-scrollbar{
+      width:6px;
+    }
+
+    .chat-body::-webkit-scrollbar-thumb{
+      background:#2a3942;
+      border-radius:10px;
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="chat-container">
+
+    <div class="chat-header">
+      <div class="avatar">G</div>
+
+      <div class="chat-info">
+        <h3>Group Chat</h3>
+        <p>5 members online</p>
+      </div>
+    </div>
+
+    <!-- Chat Body -->
+    <div class="chat-body" id="chatBody">
+
+      <div class="message received">
+        Hey everyone 👋
+        <span class="timestamp">10:12 AM</span>
+      </div>
+
+      <div class="message sent">
+        Hello! How are you?
+        <span class="timestamp">10:13 AM</span>
+      </div>
+
+      <div class="message received">
+        Working on the chat app UI 
+        <span class="timestamp">10:14 AM</span>
+      </div>
+
+      <div class="message sent">
+        Nice! Looks awesome already 😎
+        <span class="timestamp">10:15 AM</span>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+
+    <form class="chat-footer" id="chatForm">
+
+      <input type="text"id="messageInput" placeholder="Type a message..."  autocomplete="off">
+
+      <button class="send-btn" type="submit">
+        ➤
+      </button>
+
+    </form>
+
+  </div>
+
+  <script>
+
+    const chatForm = document.getElementById("chatForm");
+    const chatBody = document.getElementById("chatBody");
+    const messageInput = document.getElementById("messageInput");
+
+    chatForm.addEventListener("submit", (e) => {
+
+      e.preventDefault();
+
+      const message = messageInput.value.trim();
+
+      if(message === "") return;
+
+      // current time
+      const time = new Date().toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+
+      // create message div
+      const messageDiv = document.createElement("div");
+
+      messageDiv.classList.add("message", "sent");
+
+      messageDiv.innerHTML = `
+        ${message}
+        <span class="timestamp">${time} ✓</span>
+      `;
+
+      chatBody.appendChild(messageDiv);
+
+      // clear input
+      messageInput.value = "";
+
+      // auto scroll
+      chatBody.scrollTop = chatBody.scrollHeight;
+
+    });
+
+  </script>
+
+</body>
+</html>
