@@ -10,7 +10,7 @@ const Chat = db.define('Chat', {
     autoIncrement: true
   },
 
-  chat_msg: {
+  message: {
     type: DataTypes.STRING,
     allowNull: false
   },

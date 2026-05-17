@@ -1,4 +1,3 @@
-const { timeStamp } = require('node:console');
 const Chat = require('../models/chats');
 const Signup = require('../models/signup');
 
@@ -54,7 +53,8 @@ const getChats = async (req,res)=>{
   }
   return res.status(200).json({
    message:'all messages',
-   data:response
+   data:response,
+   userId:req.user.userId
   })
  }
  catch(err){

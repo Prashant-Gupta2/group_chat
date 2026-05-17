@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Group Chat UI</title>
 
   <style>
@@ -75,6 +75,8 @@
       padding:20px;
       overflow-y:auto;
       scroll-behavior:smooth;
+      display:flex;
+      flex-direction:column;
       background:#0b141a;
     }
 
@@ -98,7 +100,7 @@
     .sent{
       background:#005c4b;
       color:white;
-      margin-left:auto;
+      align-self:flex-end;
       border-top-right-radius:2px;
     }
 
@@ -166,159 +168,130 @@
 
   </style>
 </head>
+
 <body>
 
   <div class="chat-container">
 
+    <!-- Header -->
     <div class="chat-header">
+
       <div class="avatar">G</div>
 
       <div class="chat-info">
         <h3>Group Chat</h3>
-        <p>5 members online</p>
+        <p>Online</p>
       </div>
+
     </div>
 
     <!-- Chat Body -->
-    <div class="chat-body" id="chatBody">
+    <div class="chat-body" id="chatBody"></div>
 
-      <div class="message received">
-        Hey everyone 
-        <span class="timestamp">10:12 AM</span>
-      </div>
-
-      <div class="message sent">
-        Hello! How are you?
-        <span class="timestamp">10:13 AM</span>
-      </div>
-
-      <div class="message received">
-        Working on the chat app UI 
-        <span class="timestamp">10:14 AM</span>
-      </div>
-
-      <div class="message sent">
-        Nice! Looks awesome already
-        <span class="timestamp">10:15 AM</span>
-      </div>
-
-    </div>
-
+    <!-- Footer -->
     <form class="chat-footer" id="chatForm">
 
-      <input type="text"id="messageInput" placeholder="Type a message..."  autocomplete="off">
+      <input type="text"  id="messageInput" placeholder="Type a message..."autocomplete="off" />
 
       <button class="send-btn" type="submit">
         ➤
       </button>
-
     </form>
-
   </div>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
   <script>
 
-window.addEventListener("DOMContentLoaded", () => {
+    window.addEventListener("DOMContentLoaded", () => {
 
-  const API_BASE_URL = "http://localhost:4000";
+      const API_BASE_URL = "http://localhost:4000";
 
-  const token = localStorage.getItem("token");
+      const token = localStorage.getItem("token");
 
-  const chatForm = document.getElementById("chatForm");
-  const chatBody = document.getElementById("chatBody");
-  const messageInput = document.getElementById("messageInput");
+      const chatForm = document.getElementById("chatForm");
 
-  loadMessages();-
+      const chatBody = document.getElementById("chatBody");
 
-  chatForm.addEventListener("submit", async (e) => {
+      const messageInput = document.getElementById("messageInput");
 
-    e.preventDefault();
+      // SOCKET CONNECTION
+      const socket = io(API_BASE_URL);
 
-    try {
-
-      const message = messageInput.value.trim();
-
-      if (message === "") return;
-
-      const payload = {
-        message
-      };
-
-      const response = await axios.post(
-        `${API_BASE_URL}/chat-app/chat-add`,
-        payload,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
-      messageInput.value = "";
-
+      // LOAD OLD MESSAGES
       loadMessages();
 
-    } catch (err) {
+      // SEND MESSAGE
+      chatForm.addEventListener("submit", async (e) => {
 
-      console.log(err);
+        e.preventDefault();
 
-      alert(
-        err.response?.data?.message || "Failed to send message"
-      );
-    }
+        const message = messageInput.value.trim();
 
-  });
+        if (message === "") return;
 
-  async function loadMessages() {
+        // SEND USING SOCKET
+        socket.emit("send_message", {
+          message: message,
+          token: token
+        });
 
-    try {
-
-      const response = await axios.get(
-        `${API_BASE_URL}/chat-app/get-chats`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
-
-      const allmsg = response.data.data;
-
-      chatBody.innerHTML = "";
-
-      allmsg.forEach((msg) => {
-
-        const messageDiv = document.createElement("div");
-
-        messageDiv.classList.add("message", "sent");
-
-        const time = new Date(msg.createdAt)
-          .toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit'
-          });
-
-        messageDiv.innerHTML = `
-          ${msg.chat_msg}
-
-          <div class="message-info">
-            <span class="timestamp">${time} ✓✓</span>
-          </div>
-        `;
-
-        chatBody.appendChild(messageDiv);
-
+        messageInput.value = "";
       });
 
-      // auto scroll bottom
-      chatBody.scrollTop = chatBody.scrollHeight;
+      // RECEIVE REALTIME MESSAGE
+      socket.on("receive_message", (msg) => {
+        appendMessage(msg);
+      });
 
-    } catch (err) {
+      async function loadMessages() {
+        try {
+          const response = await axios.get(
+            `${API_BASE_URL}/chat-app/get-chats`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            }
+          );
 
-      console.log(err);
+          const allmsg = response.data.data;
 
-    }
-  }
-});
-</script>
+          chatBody.innerHTML = "";
+
+          allmsg.forEach((msg) => {
+            appendMessage(msg);
+          });
+
+        }
+         catch (err) {
+          console.log(err);
+        }
+      }
+  function appendMessage(msg) {
+
+    if (!msg) return;
+
+    const messageDiv = document.createElement("div");
+
+    const text = msg.message ||'';
+
+    const time = msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit'
+      }) : '';
+
+  messageDiv.classList.add("message", "sent");
+
+  messageDiv.innerHTML = `${text} <span class="timestamp">${time} ✓✓</span>`;
+
+  chatBody.appendChild(messageDiv);
+
+  chatBody.scrollTop = chatBody.scrollHeight;
+   }
+ });
+
+  </script>
+
 </body>
 </html>
