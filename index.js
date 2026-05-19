@@ -10,6 +10,8 @@ const { Server } = require('socket.io');
 const app = express();
 
 const server = http.createServer(app);
+const socketIO = require('./socket_io/socket')
+const io = socketIO(server);
 
 const db = require('./config/dbConnection');
 
@@ -23,14 +25,6 @@ const chatsRoute = require('./routes/chatsRoute');
 
 const jwt = require('jsonwebtoken');
 
-const io = new Server(server, {
-
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"]
-  }
-
-});
 
 app.use(express.json());
 
@@ -54,78 +48,28 @@ app.use('/chat-app', signinRoute);
 
 app.use('/chat-app', chatsRoute);
 
+ io.use((socket, next) => {
+  try {
 
-io.on('connection', (socket) => {
+    const token = socket.handshake.auth.token;
 
-  console.log(`User Connected: ${socket.id}`);
-
-  // RECEIVE MESSAGE
-  socket.on('send_message', async (data) => {
-    try {
-      // TOKEN CHECK
-      if (!data.token) {
-        return socket.emit('error_message', {
-          message: 'Unauthorized user'
-        });
-      }
-
-      // VERIFY TOKEN
-      const decoded = jwt.verify(
-        data.token,
-        process.env.JWT_SECRET
-      );
-
-      // FIND USER
-      const user = await Signup.findByPk(
-        decoded.userId
-      );
-
-      if (!user) {
-        return socket.emit('error_message', {
-          message: 'User not found'
-        });
-
-      }
-      // SAVE MESSAGE
-      const savedMessage = await Chat.create({
-        message: data.message,
-        userId: user.userId
-      });
-
-      const fullMessage = await Chat.findByPk(
-        savedMessage.id,
-        {
-          include: [
-            {
-              model: Signup,
-              attributes: ['name']
-            }
-          ]
-        }
-      );
-
-      // SEND TO ALL USERS
-     io.emit('receive_message', {
-    id: savedMessage.id,
-    message: savedMessage.message,
-    userId: savedMessage.userId,
-    name: user.name,
-    createdAt: savedMessage.createdAt
-  });
+    if (!token) {
+      return next(new Error("No token provided"));
     }
-     catch (err) {
 
-      console.log(err);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-      socket.emit('error_message', {
-        message: 'Failed to send message'
-      });
-    }
-  });
-  socket.on('disconnect', () => {
-    console.log(`User Disconnected: ${socket.id}`);
-  });
+    socket.user = decoded;
+
+    next();
+
+  } catch (err) {
+    console.log(err);
+    next(new Error("Invalid token"));
+  }
 });
+
+
 
 db.sync()
   .then(() => {

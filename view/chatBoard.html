@@ -174,8 +174,13 @@
   <div class="chat-container">
 
     <!-- Header -->
+      <div>
+        <label for="txtemail" style="color: #fff; margin-left: 3px;">Email:</label>
+        <input type="text" id="txtemail" placeholder="Enter join email" style="padding: 5px; cursor: pointer;">
+        <button id="joinbtn" style="padding: 5px;">Join</button>
+      </div>
     <div class="chat-header">
-
+     
       <div class="avatar">G</div>
 
       <div class="chat-info">
@@ -198,100 +203,132 @@
       </button>
     </form>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+ <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 
-  <script>
+<script>
+window.addEventListener("DOMContentLoaded", () => {
 
-    window.addEventListener("DOMContentLoaded", () => {
+  const API_BASE_URL = "http://localhost:4000";
 
-      const API_BASE_URL = "http://localhost:4000";
+  const token = localStorage.getItem("token");
+  const userId = localStorage.getItem("userId");
 
-      const token = localStorage.getItem("token");
+  const chatForm = document.getElementById("chatForm");
+  const chatBody = document.getElementById("chatBody");
+  const messageInput = document.getElementById("messageInput");
+  const joinbtn = document.getElementById("joinbtn");
 
-      const chatForm = document.getElementById("chatForm");
+  // SOCKET
+  const socket = io(API_BASE_URL, {
+    auth: { token }
+  });
 
-      const chatBody = document.getElementById("chatBody");
+  // CURRENT ROOM
+  window.roomName = null;
 
-      const messageInput = document.getElementById("messageInput");
+  // LOAD OLD MESSAGES
+  loadMessages();
 
-      // SOCKET CONNECTION
-      const socket = io(API_BASE_URL);
+  // JOIN ROOM
+  joinbtn.addEventListener("click", () => {
 
-      // LOAD OLD MESSAGES
-      loadMessages();
+    const email = document.getElementById("txtemail").value.trim();
 
-      // SEND MESSAGE
-      chatForm.addEventListener("submit", async (e) => {
+    if (!email) {
+      return alert("Enter room email");
+    }
 
-        e.preventDefault();
+    socket.emit("join-room", email);
 
-        const message = messageInput.value.trim();
+    window.roomName = email;
 
-        if (message === "") return;
+    alert(`Joined room: ${email}`);
+  });
 
-        // SEND USING SOCKET
-        socket.emit("send_message", {
-          message: message,
-          token: token
-        });
+  chatForm.addEventListener("submit", (e) => {
 
-        messageInput.value = "";
-      });
+    e.preventDefault();
 
-      // RECEIVE REALTIME MESSAGE
-      socket.on("receive_message", (msg) => {
-        appendMessage(msg);
-      });
+    const message = messageInput.value.trim();
 
-      async function loadMessages() {
-        try {
-          const response = await axios.get(
-            `${API_BASE_URL}/chat-app/get-chats`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`
-              }
-            }
-          );
+    if (!message) return;
 
-          const allmsg = response.data.data;
+    if (!window.roomName) {
+      return alert("Please join a room first");
+    }
 
-          chatBody.innerHTML = "";
+    socket.emit("personal_message", {
+      message,
+      roomName: window.roomName
+    });
 
-          allmsg.forEach((msg) => {
-            appendMessage(msg);
-          });
+    messageInput.value = "";
 
+  });
+
+  socket.on("receive_message", (msg) => {
+    appendMessage(msg);
+  });
+
+  async function loadMessages() {
+
+    try {
+
+      const response = await axios.get(
+        `${API_BASE_URL}/chat-app/get-chats`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
         }
-         catch (err) {
-          console.log(err);
-        }
-      }
+      );
+
+      const allmsg = response.data.data;
+
+      chatBody.innerHTML = "";
+
+      allmsg.forEach(msg => appendMessage(msg));
+
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
   function appendMessage(msg) {
 
     if (!msg) return;
 
-    const messageDiv = document.createElement("div");
+    const div = document.createElement("div");
 
-    const text = msg.message ||'';
+    const msgUserId = msg.userId || msg.Signup?.userId;
 
-    const time = msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit'
-      }) : '';
+    const name = msg.name || msg.Signup?.name || "Unknown";
 
-  messageDiv.classList.add("message", "sent");
+    if (Number(msgUserId) === Number(userId)) {
+      div.classList.add("message", "sent");
+    } else {
+      div.classList.add("message", "received");
+    }
 
-  messageDiv.innerHTML = `${text} <span class="timestamp">${time} ✓✓</span>`;
+    const time = new Date(msg.createdAt)
+      .toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit"
+      });
 
-  chatBody.appendChild(messageDiv);
+    div.innerHTML = `
+      ${msg.message}<br>
+      <small>from ${name}</small>
+      <span class="timestamp">${time}</span>
+    `;
 
-  chatBody.scrollTop = chatBody.scrollHeight;
-   }
- });
+    chatBody.appendChild(div);
 
-  </script>
+    chatBody.scrollTop = chatBody.scrollHeight;
+  }
 
+});
+</script>
 </body>
 </html>

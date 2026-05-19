@@ -133,32 +133,40 @@
   </div>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
  <script>
-window.addEventListener("DOMContentLoaded", () => {
-  const error = document.querySelector(".error");
+ window.addEventListener("DOMContentLoaded", () => {
+
   const signin = document.getElementById("signin");
   const API_BASE_URL = "http://localhost:4000";
+
+  const emailInput = document.getElementById("txtemail");
+  const phoneInput = document.getElementById("txtphone");
+  const passwordInput = document.getElementById("txtpassword");
+
+  const btn = document.querySelector(".login-btn");
 
   signin.addEventListener("submit", async (e) => {
     e.preventDefault();
 
+    const email = emailInput.value.trim();
+    const phone = phoneInput.value.trim();
+    const password = passwordInput.value.trim();
+
+    // 🔥 BASIC VALIDATION
+    if (!email || !password) {
+      alert("Email and password are required!");
+      return;
+    }
+
     try {
 
-      const email = document.getElementById("txtemail").value;
-      const phone = document.getElementById("txtphone").value;
-      const password = document.getElementById("txtpassword").value;
-
-      const payload = {
-        email,
-        phone,
-        password
-      };
+      // LOADING STATE
+      btn.disabled = true;
+      btn.innerText = "Logging in...";
 
       const response = await axios.post(
         `${API_BASE_URL}/chat-app/signin`,
-          payload
+        { email, phone, password }
       );
-
-      console.log(response.data);
 
       const { token, user, message } = response.data;
 
@@ -166,18 +174,29 @@ window.addEventListener("DOMContentLoaded", () => {
         alert("Invalid credentials!");
         return;
       }
+
+      // STORE USER DATA
+      localStorage.setItem("token", token);
+      localStorage.setItem("userId", user.userId);
+      localStorage.setItem("username", user.name);
+
       alert(message || "Login successful");
 
-      localStorage.setItem("token", token);
-
+      // REDIRECT
       window.location.href = "./chatBoard.html";
 
     } catch (err) {
+
       console.log(err);
 
-      alert(
-        err.response?.data?.message || "Login failed"
-      );
+      alert(err.response?.data?.message || "Login failed");
+
+    } finally {
+
+      // RESET BUTTON
+      btn.disabled = false;
+      btn.innerText = "Login";
+
     }
 
   });
