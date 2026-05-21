@@ -13,7 +13,30 @@
       box-sizing:border-box;
       font-family: Arial, sans-serif;
     }
+    #media{
+  position: relative;
+  cursor: pointer;
+   }
+    #media::after{
+  content: "";
+  position: absolute;
+  opacity: 0;
+  transition: 0.3s;
+}
 
+#media:hover::after{
+  content: "Media Share";
+  opacity: 1;
+  position: absolute;
+  top: -30px;
+  left: 0;
+  background: #222;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 12px;
+  white-space: nowrap;
+}
     body{
       height:100vh;
       display:flex;
@@ -195,8 +218,13 @@
 
     <!-- Footer -->
     <form class="chat-footer" id="chatForm">
+        <label id="media" for="mediaInput" style="cursor:pointer;color:white;font-size:22px;">
+    📎
+  </label>
 
-      <input type="text"  id="messageInput" placeholder="Type a message..."autocomplete="off" />
+  <input  type="file" id="mediaInput" style="display:none" />
+  <input type="text"  id="messageInput" placeholder="Type a message..."autocomplete="off" />
+    
 
       <button class="send-btn" type="submit">
         ➤
@@ -218,13 +246,13 @@ window.addEventListener("DOMContentLoaded", () => {
   const chatBody = document.getElementById("chatBody");
   const messageInput = document.getElementById("messageInput");
   const joinbtn = document.getElementById("joinbtn");
+  const mediaInput = document.getElementById("mediaInput");
 
   // SOCKET
   const socket = io(API_BASE_URL, {
     auth: { token }
   });
 
-  // CURRENT ROOM
   window.roomName = null;
 
   // LOAD OLD MESSAGES
@@ -235,9 +263,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     const email = document.getElementById("txtemail").value.trim();
 
-    if (!email) {
-      return alert("Enter room email");
-    }
+    if (!email) return alert("Enter room email");
 
     socket.emit("join-room", email);
 
@@ -246,31 +272,67 @@ window.addEventListener("DOMContentLoaded", () => {
     alert(`Joined room: ${email}`);
   });
 
+  // =========================
+  // INSTANT MEDIA PREVIEW
+  // =========================
+  mediaInput.addEventListener("change", (e) => {
+
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = function (event) {
+
+      const fileUrl = event.target.result;
+
+      appendMediaPreview(file, fileUrl);
+    };
+
+    reader.readAsDataURL(file);
+  });
+
+  // =========================
+  // CHAT FORM (TEXT ONLY)
+  // =========================
   chatForm.addEventListener("submit", (e) => {
 
     e.preventDefault();
 
     const message = messageInput.value.trim();
 
-    if (!message) return;
-
     if (!window.roomName) {
       return alert("Please join a room first");
     }
 
-    socket.emit("personal_message", {
-      message,
-      roomName: window.roomName
-    });
+    if (message) {
+
+      socket.emit("personal_message", {
+        message,
+        roomName: window.roomName
+      });
+
+      appendMessage({
+        message,
+        userId: userId,
+        createdAt: new Date()
+      });
+    }
 
     messageInput.value = "";
-
+    mediaInput.value = "";
   });
 
+  // =========================
+  // RECEIVE MESSAGE
+  // =========================
   socket.on("receive_message", (msg) => {
     appendMessage(msg);
   });
 
+  // =========================
+  // LOAD OLD MESSAGES
+  // =========================
   async function loadMessages() {
 
     try {
@@ -295,6 +357,9 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // =========================
+  // TEXT MESSAGE RENDER
+  // =========================
   function appendMessage(msg) {
 
     if (!msg) return;
@@ -311,20 +376,60 @@ window.addEventListener("DOMContentLoaded", () => {
       div.classList.add("message", "received");
     }
 
-    const time = new Date(msg.createdAt)
+    const time = new Date(msg.createdAt || Date.now())
       .toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit"
       });
 
     div.innerHTML = `
-      ${msg.message}<br>
+      ${msg.message || ""}
+      <br>
       <small>from ${name}</small>
       <span class="timestamp">${time}</span>
     `;
 
     chatBody.appendChild(div);
+    chatBody.scrollTop = chatBody.scrollHeight;
+  }
 
+  // =========================
+  // MEDIA PREVIEW RENDER
+  // =========================
+  function appendMediaPreview(file, fileUrl) {
+
+    const div = document.createElement("div");
+    div.classList.add("message", "sent");
+
+    let content = "";
+
+    if (file.type.startsWith("image")) {
+      content = `
+        <img src="${fileUrl}"
+          style="width:100%; border-radius:10px; margin-top:5px;" />
+      `;
+    }
+
+    else if (file.type.startsWith("video")) {
+      content = `
+        <video controls
+          style="width:100%; border-radius:10px; margin-top:5px;">
+          <source src="${fileUrl}">
+        </video>
+      `;
+    }
+
+    else {
+      content = `📄 ${file.name}`;
+    }
+
+    div.innerHTML = `
+      ${content}
+      <small>Ready to send</small>
+      <span class="timestamp">now</span>
+    `;
+
+    chatBody.appendChild(div);
     chatBody.scrollTop = chatBody.scrollHeight;
   }
 

@@ -22,6 +22,7 @@ const Chat = require('./models/chats');
 const signupRoute = require('./routes/signupRoute');
 const signinRoute = require('./routes/signinRoute');
 const chatsRoute = require('./routes/chatsRoute');
+const mediaRoute = require('./routes/mediashareRoute');
 
 const jwt = require('jsonwebtoken');
 
@@ -47,6 +48,8 @@ app.use('/chat-app', signupRoute);
 app.use('/chat-app', signinRoute);
 
 app.use('/chat-app', chatsRoute);
+
+app.use('/chat-app',mediaRoute);
 
  io.use((socket, next) => {
   try {
