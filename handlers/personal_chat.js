@@ -8,21 +8,33 @@ module.exports = (socket, io) => {
   // JOIN ROOM
   socket.on("join-room", (roomName) => {
 
+    if (!roomName) return;
+
     socket.join(roomName);
 
-    console.log(`${socket.user.name} joined ${roomName}`);
-
+    console.log(`User ${socket.user.userId} joined ${roomName}`);
   });
 
-  // PERSONAL MESSAGE
+  // SEND MESSAGE
   socket.on("personal_message", async ({ message, roomName }) => {
 
     try {
 
       // VALIDATION
       if (!message || message.trim() === "") {
+
         return socket.emit("error_message", {
           message: "Message cannot be empty"
+        });
+      }
+
+      // CHECK ROOM MEMBERSHIP
+      const rooms = [...socket.rooms];
+
+      if (!rooms.includes(roomName)) {
+
+        return socket.emit("error_message", {
+          message: "You are not in this room"
         });
       }
 
@@ -30,6 +42,7 @@ module.exports = (socket, io) => {
       const user = await Signup.findByPk(socket.user.userId);
 
       if (!user) {
+
         return socket.emit("error_message", {
           message: "User not found"
         });
@@ -38,18 +51,22 @@ module.exports = (socket, io) => {
       // SAVE MESSAGE
       const savedMessage = await Chat.create({
         message,
+        roomName,
         userId: user.userId
       });
 
-      // SEND TO ROOM
-      io.to(roomName).emit("receive_message", {
+      // PAYLOAD
+      const payload = {
         id: savedMessage.id,
         message: savedMessage.message,
+        roomName,
         userId: user.userId,
         name: user.name,
-        roomName,
         createdAt: savedMessage.createdAt
-      });
+      };
+
+      // SEND TO ROOM
+      io.to(roomName).emit("receive_message", payload);
 
     } catch (err) {
 
@@ -58,12 +75,12 @@ module.exports = (socket, io) => {
       socket.emit("error_message", {
         message: "Failed to send message"
       });
-
     }
-
   });
 
+  // DISCONNECT
   socket.on("disconnect", () => {
+
     console.log("User disconnected:", socket.id);
   });
 

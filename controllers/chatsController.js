@@ -1,38 +1,38 @@
-const Chat = require('../models/chats');
-const Signup = require('../models/signup');
+const Chat = require("../models/chats");
+const Signup = require("../models/signup");
+
 
 const addChats = async (req, res) => {
 
   try {
 
-    const { message } = req.body;
+    const { message,  mediaUrl,  mediaType } = req.body;
 
-    if (!message || message.trim() === "") {
+    if (!message?.trim() && !mediaUrl) {
       return res.status(400).json({
-        message: 'Please write something!'
+        message: "Message or media required!"
       });
     }
 
-    // logged-in user
+    // LOGGED IN USER
     const user = await Signup.findByPk(req.user.userId);
 
     if (!user) {
+
       return res.status(404).json({
-        message: 'User not found!'
+        message: "User not found!"
       });
     }
-     const time = new Date().toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit'
-      });
+
+    // SAVE CHAT
     const response = await Chat.create({
-      message: message,
-      timestamp:time,
+      message: message || "",
+      mediaUrl: mediaUrl || null,
+      mediaType: mediaType || null,
       userId: user.userId
     });
-
     return res.status(201).json({
-      message: 'Message added!',
+      message: "Message added!",
       chat: response
     });
 
@@ -41,38 +41,35 @@ const addChats = async (req, res) => {
     console.log(err);
 
     return res.status(500).json({
-      message: 'Failed to add message!'
+      message: "Failed to add message!"
     });
   }
 };
+
 const getChats = async (req, res) => {
-
   try {
-
     const response = await Chat.findAll({
       include: [
         {
           model: Signup,
-          attributes: ['userId', 'name']
+          attributes: ["userId", "name"]
         }
-      ]
+      ],
+      order: [["createdAt", "ASC"]]
     });
 
     return res.status(200).json({
-      message: 'all messages',
+      message: "All messages",
       data: response,
       userId: req.user.userId
     });
 
   } catch (err) {
-
     console.log(err);
-
     return res.status(500).json({
-      message: 'internal server error'
+      message: "Internal server error"
     });
-
   }
 };
 
-module.exports = { addChats ,getChats};
+module.exports = { addChats,getChats};

@@ -51,30 +51,7 @@ app.use('/chat-app', chatsRoute);
 
 app.use('/chat-app',mediaRoute);
 
- io.use((socket, next) => {
-  try {
-
-    const token = socket.handshake.auth.token;
-
-    if (!token) {
-      return next(new Error("No token provided"));
-    }
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    socket.user = decoded;
-
-    next();
-
-  } catch (err) {
-    console.log(err);
-    next(new Error("Invalid token"));
-  }
-});
-
-
-
-db.sync()
+db.sync({alter:true})
   .then(() => {
     const PORT = process.env.PORT || 4000;
     server.listen(PORT, () => {

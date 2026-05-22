@@ -1,439 +1,518 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Group Chat UI</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <style>
+    <title>Group Chat UI</title>
 
-    *{
-      margin:0;
-      padding:0;
-      box-sizing:border-box;
-      font-family: Arial, sans-serif;
-    }
-    #media{
-  position: relative;
-  cursor: pointer;
-   }
-    #media::after{
-  content: "";
-  position: absolute;
-  opacity: 0;
-  transition: 0.3s;
-}
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: Arial, sans-serif;
+      }
+      #previewBox img,
+      #previewBox video {
+        width: 100%;
+        max-height: 200px;
+        border-radius: 10px;
+        margin-bottom: 8px;
+      }
 
-#media:hover::after{
-  content: "Media Share";
-  opacity: 1;
-  position: absolute;
-  top: -30px;
-  left: 0;
-  background: #222;
-  color: white;
-  padding: 5px 10px;
-  border-radius: 5px;
-  font-size: 12px;
-  white-space: nowrap;
-}
-    body{
-      height:100vh;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      background:#111b21;
-    }
+      #cancelPreview {
+        background: red;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        cursor: pointer;
+        border-radius: 5px;
+      }
+      body {
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #111b21;
+      }
 
-    .chat-container{
-      width:420px;
-      height:90vh;
-      background:#0b141a;
-      border-radius:15px;
-      overflow:hidden;
-      display:flex;
-      flex-direction:column;
-      box-shadow:0 0 20px rgba(0,0,0,0.5);
-    }
+      .chat-container {
+        width: 420px;
+        height: 90vh;
+        background: #0b141a;
+        border-radius: 15px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+      }
 
-    /* Header */
+      .top-bar {
+        padding: 10px;
+        background: #202c33;
+        display: flex;
+        gap: 10px;
+      }
 
-    .chat-header{
-      height:70px;
-      background:#202c33;
-      display:flex;
-      align-items:center;
-      padding:0 20px;
-      color:white;
-      border-bottom:1px solid #2a3942;
-    }
+      .top-bar input {
+        flex: 1;
+        padding: 8px;
+        border: none;
+        outline: none;
+        border-radius: 5px;
+      }
 
-    .avatar{
-      width:45px;
-      height:45px;
-      border-radius:50%;
-      background:#25d366;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      font-weight:bold;
-      margin-right:15px;
-      color:white;
-    }
+      .top-bar button {
+        padding: 8px 12px;
+        cursor: pointer;
+        border: none;
+        border-radius: 5px;
+        background: #25d366;
+        color: white;
+      }
 
-    .chat-info h3{
-      font-size:17px;
-    }
+      .chat-header {
+        height: 70px;
+        background: #202c33;
+        display: flex;
+        align-items: center;
+        padding: 0 20px;
+        color: white;
+        border-bottom: 1px solid #2a3942;
+      }
 
-    .chat-info p{
-      font-size:12px;
-      color:#8696a0;
-      margin-top:3px;
-    }
+      .avatar {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background: #25d366;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: bold;
+        margin-right: 15px;
+        color: white;
+      }
 
-    /* Chat Messages */
+      .chat-info h3 {
+        font-size: 17px;
+      }
 
-    .chat-body{
-      flex:1;
-      padding:20px;
-      overflow-y:auto;
-      scroll-behavior:smooth;
-      display:flex;
-      flex-direction:column;
-      background:#0b141a;
-    }
+      .chat-info p {
+        font-size: 12px;
+        color: #8696a0;
+        margin-top: 3px;
+      }
 
-    .message{
-      max-width:75%;
-      padding:10px 14px;
-      margin-bottom:15px;
-      border-radius:10px;
-      position:relative;
-      line-height:1.4;
-      word-wrap:break-word;
-    }
+      .chat-body {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        background: #0b141a;
+      }
 
-    .received{
-      background:#202c33;
-      color:white;
-      align-self:flex-start;
-      border-top-left-radius:2px;
-    }
+      .message {
+        max-width: 75%;
+        padding: 10px 14px;
+        margin-bottom: 15px;
+        border-radius: 10px;
+        line-height: 1.4;
+        word-wrap: break-word;
+      }
 
-    .sent{
-      background:#005c4b;
-      color:white;
-      align-self:flex-end;
-      border-top-right-radius:2px;
-    }
+      .received {
+        background: #202c33;
+        color: white;
+        align-self: flex-start;
+      }
 
-    .timestamp{
-      display:block;
-      font-size:11px;
-      color:#c7d1d6;
-      margin-top:5px;
-      text-align:right;
-    }
+      .sent {
+        background: #005c4b;
+        color: white;
+        align-self: flex-end;
+      }
 
-    /* Input Area */
+      .timestamp {
+        display: block;
+        font-size: 11px;
+        margin-top: 5px;
+        text-align: right;
+        color: #ddd;
+      }
 
-    .chat-footer{
-      height:70px;
-      background:#202c33;
-      display:flex;
-      align-items:center;
-      padding:10px;
-      gap:10px;
-      border-top:1px solid #2a3942;
-    }
+      .chat-footer {
+        height: 70px;
+        background: #202c33;
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        gap: 10px;
+      }
 
-    .chat-footer input{
-      flex:1;
-      padding:12px 15px;
-      border:none;
-      outline:none;
-      border-radius:25px;
-      background:#2a3942;
-      color:white;
-      font-size:15px;
-    }
+      .chat-footer input[type="text"] {
+        flex: 1;
+        padding: 12px;
+        border: none;
+        outline: none;
+        border-radius: 25px;
+        background: #2a3942;
+        color: white;
+      }
 
-    .chat-footer input::placeholder{
-      color:#8696a0;
-    }
+      .send-btn {
+        width: 50px;
+        height: 50px;
+        border: none;
+        border-radius: 50%;
+        background: #25d366;
+        color: white;
+        cursor: pointer;
+        font-size: 18px;
+      }
 
-    .send-btn{
-      width:50px;
-      height:50px;
-      border:none;
-      border-radius:50%;
-      background:#25d366;
-      color:white;
-      font-size:18px;
-      cursor:pointer;
-      transition:0.3s;
-    }
+      img,
+      video {
+        width: 100%;
+        max-height: 300px;
+        object-fit: cover;
+        border-radius: 10px;
+      }
 
-    .send-btn:hover{
-      background:#20bd5a;
-    }
+      audio {
+        width: 100%;
+      }
 
-    /* Scrollbar */
+      a {
+        color: #53bdeb;
+      }
+    </style>
+  </head>
 
-    .chat-body::-webkit-scrollbar{
-      width:6px;
-    }
+  <body>
+    <div class="chat-container">
+      <!-- ROOM JOIN -->
+      <div class="top-bar">
+        <input type="text" id="txtemail" placeholder="Enter room name/email" />
 
-    .chat-body::-webkit-scrollbar-thumb{
-      background:#2a3942;
-      border-radius:10px;
-    }
-
-  </style>
-</head>
-
-<body>
-
-  <div class="chat-container">
-
-    <!-- Header -->
-      <div>
-        <label for="txtemail" style="color: #fff; margin-left: 3px;">Email:</label>
-        <input type="text" id="txtemail" placeholder="Enter join email" style="padding: 5px; cursor: pointer;">
-        <button id="joinbtn" style="padding: 5px;">Join</button>
-      </div>
-    <div class="chat-header">
-     
-      <div class="avatar">G</div>
-
-      <div class="chat-info">
-        <h3>Group Chat</h3>
-        <p>Online</p>
+        <button id="joinbtn">Join</button>
       </div>
 
+      <!-- HEADER -->
+      <div class="chat-header">
+        <div class="avatar">G</div>
+
+        <div class="chat-info">
+          <h3>Group Chat</h3>
+          <p>Online</p>
+        </div>
+      </div>
+
+      <!-- CHAT BODY -->
+      <div class="chat-body" id="chatBody"></div>
+      <!-- PREVIEW AREA -->
+      <div
+        id="previewBox"
+        style="display: none; padding: 10px; background: #111b21"
+      ></div>
+      <!-- FOOTER -->
+      <form class="chat-footer" id="chatForm">
+        <label
+          for="mediaInput"
+          style="cursor: pointer; color: white; font-size: 22px"
+        >
+          📎
+        </label>
+
+        <input type="file" id="mediaInput" hidden />
+
+        <input
+          type="text"
+          id="messageInput"
+          placeholder="Type a message..."
+          autocomplete="off"
+        />
+
+        <button class="send-btn" type="submit">➤</button>
+      </form>
     </div>
 
-    <!-- Chat Body -->
-    <div class="chat-body" id="chatBody"></div>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 
-    <!-- Footer -->
-    <form class="chat-footer" id="chatForm">
-        <label id="media" for="mediaInput" style="cursor:pointer;color:white;font-size:22px;">
-    📎
-  </label>
+    <script>
+      window.addEventListener("DOMContentLoaded", () => {
+        const API_BASE_URL = "http://localhost:4000";
 
-  <input  type="file" id="mediaInput" style="display:none" />
-  <input type="text"  id="messageInput" placeholder="Type a message..."autocomplete="off" />
-    
+        const token = localStorage.getItem("token");
 
-      <button class="send-btn" type="submit">
-        ➤
-      </button>
-    </form>
-  </div>
- <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+        const userId = localStorage.getItem("userId");
 
-<script>
-window.addEventListener("DOMContentLoaded", () => {
+        const chatForm = document.getElementById("chatForm");
 
-  const API_BASE_URL = "http://localhost:4000";
+        const chatBody = document.getElementById("chatBody");
 
-  const token = localStorage.getItem("token");
-  const userId = localStorage.getItem("userId");
+        const messageInput = document.getElementById("messageInput");
 
-  const chatForm = document.getElementById("chatForm");
-  const chatBody = document.getElementById("chatBody");
-  const messageInput = document.getElementById("messageInput");
-  const joinbtn = document.getElementById("joinbtn");
-  const mediaInput = document.getElementById("mediaInput");
+        const joinbtn = document.getElementById("joinbtn");
 
-  // SOCKET
-  const socket = io(API_BASE_URL, {
-    auth: { token }
-  });
+        const mediaInput = document.getElementById("mediaInput");
 
-  window.roomName = null;
+        const socket = io(API_BASE_URL, {
+          auth: { token },
+        });
 
-  // LOAD OLD MESSAGES
-  loadMessages();
+        let roomName = null;
 
-  // JOIN ROOM
-  joinbtn.addEventListener("click", () => {
+        // LOAD OLD CHATS
+        loadMessages();
+        const previewBox = document.getElementById("previewBox");
 
-    const email = document.getElementById("txtemail").value.trim();
+        mediaInput.addEventListener("change", () => {
+          const file = mediaInput.files[0];
 
-    if (!email) return alert("Enter room email");
+          if (!file) return;
 
-    socket.emit("join-room", email);
+          const url = URL.createObjectURL(file);
 
-    window.roomName = email;
+          let html = "";
 
-    alert(`Joined room: ${email}`);
-  });
+          if (file.type.startsWith("image")) {
+            html = `<img src="${url}" />`;
+          } else if (file.type.startsWith("video")) {
+            html = `
+      <video controls>
+        <source src="${url}">
+      </video>
+    `;
+          } else {
+            html = `
+      📄 ${file.name}
+    `;
+          }
 
-  // =========================
-  // INSTANT MEDIA PREVIEW
-  // =========================
-  mediaInput.addEventListener("change", (e) => {
+          previewBox.style.display = "block";
 
-    const file = e.target.files[0];
-    if (!file) return;
+          previewBox.innerHTML = `
+    ${html}
+    <br>
+    <button id="cancelPreview">Cancel</button>
+  `;
 
-    const reader = new FileReader();
+          // cancel preview
+          document.getElementById("cancelPreview").onclick = () => {
+            mediaInput.value = "";
 
-    reader.onload = function (event) {
+            previewBox.innerHTML = "";
 
-      const fileUrl = event.target.result;
+            previewBox.style.display = "none";
+          };
+        });
+        // JOIN ROOM
+        joinbtn.addEventListener("click", () => {
+          const email = document.getElementById("txtemail").value.trim();
 
-      appendMediaPreview(file, fileUrl);
-    };
+          if (!email) {
+            return alert("Enter room name");
+          }
 
-    reader.readAsDataURL(file);
-  });
+          roomName = email;
 
-  // =========================
-  // CHAT FORM (TEXT ONLY)
-  // =========================
-  chatForm.addEventListener("submit", (e) => {
+          socket.emit("join-room", roomName);
 
-    e.preventDefault();
+          alert(`Joined room: ${roomName}`);
+        });
 
-    const message = messageInput.value.trim();
+        // SEND MESSAGE
+        chatForm.addEventListener("submit", async (e) => {
+          e.preventDefault();
 
-    if (!window.roomName) {
-      return alert("Please join a room first");
-    }
+          if (!roomName) {
+            return alert("Please join room first");
+          }
 
-    if (message) {
+          const message = messageInput.value.trim();
 
-      socket.emit("personal_message", {
-        message,
-        roomName: window.roomName
-      });
+          const file = mediaInput.files[0];
 
-      appendMessage({
-        message,
-        userId: userId,
-        createdAt: new Date()
-      });
-    }
+          // TEXT MESSAGE
+          if (message) {
+            socket.emit("personal_message", {
+              roomName,
 
-    messageInput.value = "";
-    mediaInput.value = "";
-  });
+              message,
 
-  // =========================
-  // RECEIVE MESSAGE
-  // =========================
-  socket.on("receive_message", (msg) => {
-    appendMessage(msg);
-  });
+              userId,
+            });
+          }
 
-  // =========================
-  // LOAD OLD MESSAGES
-  // =========================
-  async function loadMessages() {
+          // MEDIA MESSAGE
+          if (file) {
+            try {
+              const formData = new FormData();
 
-    try {
+              // IMPORTANT FIX
+              formData.append("file", file);
+              const res = await axios.post(
+                `${API_BASE_URL}/chat-app/media-share`,
+                formData,
+                {
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "multipart/form-data",
+                  },
+                },
+              );
 
-      const response = await axios.get(
-        `${API_BASE_URL}/chat-app/get-chats`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
+              const mediaUrl = res.data.mediaUrl;
+
+              socket.emit("personal_message", {
+                roomName,
+                message: "",
+                mediaUrl,
+                mediaType: getMediaType(file.type),
+                userId,
+              });
+              previewBox.innerHTML = "";
+              previewBox.style.display = "none";
+            } catch (err) {
+              console.log(err);
+
+              alert("Media upload failed");
+            }
+          }
+
+          messageInput.value = "";
+
+          mediaInput.value = "";
+        });
+
+        // RECEIVE MESSAGE
+        socket.on("receive_message", (msg) => {
+          appendMessage(msg);
+        });
+
+        // LOAD MESSAGES
+        async function loadMessages() {
+          try {
+            const response = await axios.get(
+              `${API_BASE_URL}/chat-app/get-chats`,
+
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              },
+            );
+
+            chatBody.innerHTML = "";
+
+            response.data.data.forEach((msg) => {
+              appendMessage(msg);
+            });
+          } catch (err) {
+            console.log(err);
           }
         }
-      );
 
-      const allmsg = response.data.data;
+        // APPEND MESSAGE
+        function appendMessage(msg) {
+          const div = document.createElement("div");
 
-      chatBody.innerHTML = "";
+          const isMe = Number(msg.userId) === Number(userId);
 
-      allmsg.forEach(msg => appendMessage(msg));
+          div.classList.add("message", isMe ? "sent" : "received");
 
-    } catch (err) {
-      console.log(err);
-    }
-  }
+          let content = "";
 
-  // =========================
-  // TEXT MESSAGE RENDER
-  // =========================
-  function appendMessage(msg) {
+          // IMAGE
+          if (msg.mediaType === "image") {
+            content = `
+        <img src="${msg.mediaUrl}" />
+      `;
+          }
 
-    if (!msg) return;
+          // VIDEO
+          else if (msg.mediaType === "video") {
+            content = `
+        <video controls>
+          <source src="${msg.mediaUrl}">
+        </video>
+      `;
+          }
 
-    const div = document.createElement("div");
+          // AUDIO
+          else if (msg.mediaType === "audio") {
+            content = `
+        <audio controls>
+          <source src="${msg.mediaUrl}">
+        </audio>
+      `;
+          }
 
-    const msgUserId = msg.userId || msg.Signup?.userId;
+          // DOCUMENT
+          else if (msg.mediaType === "document") {
+            content = `
+        📄
+        <a href="${msg.mediaUrl}" target="_blank">
+          Download File
+        </a>
+      `;
+          }
 
-    const name = msg.name || msg.Signup?.name || "Unknown";
+          // TEXT
+          else {
+            content = escapeHTML(msg.message || "");
+          }
 
-    if (Number(msgUserId) === Number(userId)) {
-      div.classList.add("message", "sent");
-    } else {
-      div.classList.add("message", "received");
-    }
+          const time = new Date(msg.createdAt || Date.now()).toLocaleTimeString(
+            [],
+            {
+              hour: "2-digit",
 
-    const time = new Date(msg.createdAt || Date.now())
-      .toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit"
-      });
+              minute: "2-digit",
+            },
+          );
 
-    div.innerHTML = `
-      ${msg.message || ""}
-      <br>
-      <small>from ${name}</small>
+          div.innerHTML = `
+      ${content}
       <span class="timestamp">${time}</span>
     `;
 
-    chatBody.appendChild(div);
-    chatBody.scrollTop = chatBody.scrollHeight;
-  }
+          chatBody.appendChild(div);
 
-  // =========================
-  // MEDIA PREVIEW RENDER
-  // =========================
-  function appendMediaPreview(file, fileUrl) {
+          chatBody.scrollTop = chatBody.scrollHeight;
+        }
 
-    const div = document.createElement("div");
-    div.classList.add("message", "sent");
+        // MEDIA TYPE HELPER
+        function getMediaType(type) {
+          if (type.startsWith("image")) {
+            return "image";
+          }
 
-    let content = "";
+          if (type.startsWith("video")) {
+            return "video";
+          }
 
-    if (file.type.startsWith("image")) {
-      content = `
-        <img src="${fileUrl}"
-          style="width:100%; border-radius:10px; margin-top:5px;" />
-      `;
-    }
+          if (type.startsWith("audio")) {
+            return "audio";
+          }
 
-    else if (file.type.startsWith("video")) {
-      content = `
-        <video controls
-          style="width:100%; border-radius:10px; margin-top:5px;">
-          <source src="${fileUrl}">
-        </video>
-      `;
-    }
+          return "document";
+        }
 
-    else {
-      content = `📄 ${file.name}`;
-    }
-
-    div.innerHTML = `
-      ${content}
-      <small>Ready to send</small>
-      <span class="timestamp">now</span>
-    `;
-
-    chatBody.appendChild(div);
-    chatBody.scrollTop = chatBody.scrollHeight;
-  }
-
-});
-</script>
-</body>
+        // XSS PROTECTION
+        function escapeHTML(str) {
+          return str
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+        }
+      });
+    </script>
+  </body>
 </html>

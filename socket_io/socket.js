@@ -16,7 +16,7 @@ module.exports = (server)=>{
 
  io.on('connection', (socket) => {
   chatHandler(socket,io);
-  personalChatHandler(socket,io);
+  // personalChatHandler(socket,io);
 });
 
  return io;
