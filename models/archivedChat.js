@@ -1,54 +1,48 @@
 const { DataTypes } = require("sequelize");
-
 const db = require("../config/dbConnection");
 
-const Chat = db.define("Chat", {
-
+const ArchivedChat = db.define("ArchivedChat", {
   chat_id: {
     type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
   },
   message: {
     type: DataTypes.TEXT,
-    allowNull: true
+    allowNull: true,
   },
   mediaUrl: {
     type: DataTypes.STRING,
-    allowNull: true
+    allowNull: true,
   },
   mediaType: {
-    type: DataTypes.ENUM(
-      "image",
-      "video",
-      "audio",
-      "document"
-    ),
-    allowNull: true
+    type: DataTypes.ENUM("image", "video", "audio", "document"),
+    allowNull: true,
   },
   fileName: {
     type: DataTypes.STRING,
-    allowNull: true
+    allowNull: true,
   },
   fileSize: {
     type: DataTypes.INTEGER,
-    allowNull: true
+    allowNull: true,
   },
   thumbnailUrl: {
     type: DataTypes.STRING,
-    allowNull: true
+    allowNull: true,
   },
   roomName: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: false,
   },
   userId: {
     type: DataTypes.INTEGER,
-    allowNull: false
-  }
-
+    allowNull: false,
+  },
+  archivedAt: {
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW,
+  },
 }, {
-  timestamps: true
+  timestamps: true,
 });
 
-module.exports = Chat;
+module.exports = ArchivedChat;

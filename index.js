@@ -18,11 +18,13 @@ const db = require('./config/dbConnection');
 const Signup = require('./models/signup');
 const Signin = require('./models/signin');
 const Chat = require('./models/chats');
+const ArchivedChat = require("./models/archivedChat");
 
 const signupRoute = require('./routes/signupRoute');
 const signinRoute = require('./routes/signinRoute');
 const chatsRoute = require('./routes/chatsRoute');
 const mediaRoute = require('./routes/mediashareRoute');
+const aiRoute = require('./routes/aiRoute');
 
 const jwt = require('jsonwebtoken');
 
@@ -51,7 +53,9 @@ app.use('/chat-app', chatsRoute);
 
 app.use('/chat-app',mediaRoute);
 
-db.sync({alter:true})
+app.use('/ai',aiRoute);
+
+db.sync()
   .then(() => {
     const PORT = process.env.PORT || 4000;
     server.listen(PORT, () => {

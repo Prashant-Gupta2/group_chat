@@ -6,189 +6,224 @@
 
     <title>Group Chat UI</title>
 
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: Arial, sans-serif;
-      }
-      #previewBox img,
-      #previewBox video {
-        width: 100%;
-        max-height: 200px;
-        border-radius: 10px;
-        margin-bottom: 8px;
-      }
+   <style>
+        * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
 
-      #cancelPreview {
-        background: red;
-        color: white;
-        border: none;
-        padding: 5px 10px;
-        cursor: pointer;
-        border-radius: 5px;
-      }
-      body {
-        height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background: #111b21;
-      }
+    body {
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #111b21;
+    }
 
-      .chat-container {
-        width: 420px;
-        height: 90vh;
-        background: #0b141a;
-        border-radius: 15px;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-      }
+    .chat-container {
+      width: 420px;
+      height: 90vh;
+      background: #0b141a;
+      border-radius: 15px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    }
 
-      .top-bar {
-        padding: 10px;
-        background: #202c33;
-        display: flex;
-        gap: 10px;
-      }
+    .top-bar {
+      padding: 10px;
+      background: #202c33;
+      display: flex;
+      gap: 10px;
+    }
 
-      .top-bar input {
-        flex: 1;
-        padding: 8px;
-        border: none;
-        outline: none;
-        border-radius: 5px;
-      }
+    .top-bar input {
+      flex: 1;
+      padding: 8px;
+      border: none;
+      outline: none;
+      border-radius: 5px;
+    }
 
-      .top-bar button {
-        padding: 8px 12px;
-        cursor: pointer;
-        border: none;
-        border-radius: 5px;
-        background: #25d366;
-        color: white;
-      }
+    .top-bar button {
+      padding: 8px 12px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      background: #25d366;
+      color: white;
+    }
 
-      .chat-header {
-        height: 70px;
-        background: #202c33;
-        display: flex;
-        align-items: center;
-        padding: 0 20px;
-        color: white;
-        border-bottom: 1px solid #2a3942;
-      }
+    .chat-header {
+      height: 70px;
+      background: #202c33;
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      color: white;
+      border-bottom: 1px solid #2a3942;
+    }
 
-      .avatar {
-        width: 45px;
-        height: 45px;
-        border-radius: 50%;
-        background: #25d366;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-weight: bold;
-        margin-right: 15px;
-        color: white;
-      }
+    .avatar {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      background: #25d366;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      margin-right: 15px;
+      color: white;
+    }
 
-      .chat-info h3 {
-        font-size: 17px;
-      }
+    .chat-info h3 {
+      font-size: 17px;
+    }
 
-      .chat-info p {
-        font-size: 12px;
-        color: #8696a0;
-        margin-top: 3px;
-      }
+    .chat-info p {
+      font-size: 12px;
+      color: #8696a0;
+      margin-top: 3px;
+    }
 
-      .chat-body {
-        flex: 1;
-        padding: 20px;
-        overflow-y: auto;
-        display: flex;
-        flex-direction: column;
-        background: #0b141a;
-      }
+    .chat-body {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      background: #0b141a;
+    }
 
-      .message {
-        max-width: 75%;
-        padding: 10px 14px;
-        margin-bottom: 15px;
-        border-radius: 10px;
-        line-height: 1.4;
-        word-wrap: break-word;
-      }
+    .message {
+      max-width: 75%;
+      padding: 10px 14px;
+      margin-bottom: 15px;
+      border-radius: 10px;
+      line-height: 1.4;
+      word-wrap: break-word;
+    }
 
-      .received {
-        background: #202c33;
-        color: white;
-        align-self: flex-start;
-      }
+    .received {
+      background: #202c33;
+      color: white;
+      align-self: flex-start;
+    }
 
-      .sent {
-        background: #005c4b;
-        color: white;
-        align-self: flex-end;
-      }
+    .sent {
+      background: #005c4b;
+      color: white;
+      align-self: flex-end;
+    }
 
-      .timestamp {
-        display: block;
-        font-size: 11px;
-        margin-top: 5px;
-        text-align: right;
-        color: #ddd;
-      }
+    .timestamp {
+      display: block;
+      font-size: 11px;
+      margin-top: 5px;
+      text-align: right;
+      color: #ddd;
+    }
 
-      .chat-footer {
-        height: 70px;
-        background: #202c33;
-        display: flex;
-        align-items: center;
-        padding: 10px;
-        gap: 10px;
-      }
+    .chat-footer {
+      position: relative;
+      background: #202c33;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
 
-      .chat-footer input[type="text"] {
-        flex: 1;
-        padding: 12px;
-        border: none;
-        outline: none;
-        border-radius: 25px;
-        background: #2a3942;
-        color: white;
-      }
+    .chat-footer input[type="text"] {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      outline: none;
+      border-radius: 25px;
+      background: #2a3942;
+      color: white;
+    }
 
-      .send-btn {
-        width: 50px;
-        height: 50px;
-        border: none;
-        border-radius: 50%;
-        background: #25d366;
-        color: white;
-        cursor: pointer;
-        font-size: 18px;
-      }
+    .send-btn {
+      width: 50px;
+      height: 50px;
+      border: none;
+      border-radius: 50%;
+      background: #25d366;
+      color: white;
+      cursor: pointer;
+      font-size: 18px;
+    }
 
-      img,
-      video {
-        width: 100%;
-        max-height: 300px;
-        object-fit: cover;
-        border-radius: 10px;
-      }
+    #suggestBox {
+      position: absolute;
+      bottom: 100%;
+      left: 10px;
+      right: 10px;
 
-      audio {
-        width: 100%;
-      }
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
 
-      a {
-        color: #53bdeb;
-      }
-    </style>
+      padding: 8px;
+      margin-bottom: 8px;
+
+      background: #111b21;
+      border-radius: 10px;
+
+      z-index: 999;
+    }
+
+    .suggest-item {
+      background: #2a3942;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 15px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: 0.2s;
+    }
+
+    .suggest-item:hover {
+      background: #25d366;
+    }
+    #previewBox img,
+    #previewBox video {
+      width: 100%;
+      max-height: 200px;
+      border-radius: 10px;
+      margin-bottom: 8px;
+    }
+
+    #cancelPreview {
+      background: red;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    img,
+    video {
+      width: 100%;
+      max-height: 300px;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+
+    audio {
+      width: 100%;
+    }
+
+    a {
+      color: #53bdeb;
+    }
+   </style>
+
   </head>
 
   <body>
@@ -207,6 +242,7 @@
         <div class="chat-info">
           <h3>Group Chat</h3>
           <p>Online</p>
+          <p id="typing"> </p>
         </div>
       </div>
 
@@ -219,300 +255,315 @@
       ></div>
       <!-- FOOTER -->
       <form class="chat-footer" id="chatForm">
-        <label
-          for="mediaInput"
-          style="cursor: pointer; color: white; font-size: 22px"
-        >
-          📎
-        </label>
 
-        <input type="file" id="mediaInput" hidden />
+  <div id="suggestBox">
+    
+  </div>
 
-        <input
-          type="text"
-          id="messageInput"
-          placeholder="Type a message..."
-          autocomplete="off"
-        />
+  <label for="mediaInput">📎</label>
+  <input type="file" id="mediaInput" hidden />
 
-        <button class="send-btn" type="submit">➤</button>
-      </form>
+  <input type="text" id="messageInput" placeholder="Type a message..." />
+
+  <button class="send-btn" type="submit">➤</button>
+</form>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 
-    <script>
-      window.addEventListener("DOMContentLoaded", () => {
-        const API_BASE_URL = "http://localhost:4000";
+   <script>
+window.addEventListener("DOMContentLoaded", () => {
+  const API_BASE_URL = "http://localhost:4000";
 
-        const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token");
+  const userId = localStorage.getItem("userId");
+  const username = localStorage.getItem("username");
 
-        const userId = localStorage.getItem("userId");
+  const chatForm = document.getElementById("chatForm");
+  const chatBody = document.getElementById("chatBody");
+  const messageInput = document.getElementById("messageInput");
+  const joinbtn = document.getElementById("joinbtn");
+  const mediaInput = document.getElementById("mediaInput");
+  const previewBox = document.getElementById("previewBox");
+  const suggestBox = document.getElementById("suggestBox");
+  const userTyping = document.getElementById("typing")
 
-        const chatForm = document.getElementById("chatForm");
+  const socket = io(API_BASE_URL, {
+    auth: { token },
+  });
 
-        const chatBody = document.getElementById("chatBody");
+  let timer;
+  let roomName = null;
 
-        const messageInput = document.getElementById("messageInput");
+let debounceTimer;
+let currentRequestId = 0;
+let abortController = null;
 
-        const joinbtn = document.getElementById("joinbtn");
+let typing = false;
+let typingTimeout;
 
-        const mediaInput = document.getElementById("mediaInput");
+ function handleInput(text, callback) {
+  clearTimeout(debounceTimer);
 
-        const socket = io(API_BASE_URL, {
-          auth: { token },
-        });
+  if (!text || text.trim().length < 3) {
+    suggestBox.innerHTML = "";
+    return;
+  }
 
-        let roomName = null;
+  debounceTimer = setTimeout(async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/ai/predict`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          text,
+          userTone: "neutral",
+        }),
+      });
 
-        // LOAD OLD CHATS
-        loadMessages();
-        const previewBox = document.getElementById("previewBox");
+      const data = await res.json();
+      callback(data);
 
-        mediaInput.addEventListener("change", () => {
-          const file = mediaInput.files[0];
+    } catch (err) {
+      console.error("Predict error:", err);
+    }
+  }, 500);
+}
 
-          if (!file) return;
+  messageInput.addEventListener("input", (e) => {
+    const text = e.target.value;
 
-          const url = URL.createObjectURL(file);
+    handleInput(text, (data) => {
+      if (!data?.suggestions?.length) {
+        suggestBox.innerHTML = "";
+        return;
+      }
 
-          let html = "";
+      suggestBox.innerHTML = data.suggestions
+        .map(
+          (s) => `
+          <span class="suggest-item" style="
+            margin-right:6px;
+            padding:4px 10px;
+            background:#2a3942;
+            border-radius:12px;
+            cursor:pointer;
+            display:inline-block;
+            color:white;
+          ">${s}</span>
+        `
+        )
+        .join("");
+    });
+     if (!roomName) return;
 
-          if (file.type.startsWith("image")) {
-            html = `<img src="${url}" />`;
-          } else if (file.type.startsWith("video")) {
-            html = `
-      <video controls>
-        <source src="${url}">
-      </video>
+  if (!typing) {
+    typing = true;
+    socket.emit("typing", { roomName, username });
+  }
+
+  clearTimeout(typingTimeout);
+
+  typingTimeout = setTimeout(() => {
+    typing = false;
+    socket.emit("stop-typing", { roomName, username });
+  }, 1000);
+  });
+
+  suggestBox.addEventListener("click", (e) => {
+    if (e.target.classList.contains("suggest-item")) {
+      messageInput.value += " " + e.target.innerText + " ";
+      suggestBox.innerHTML = "";
+      messageInput.focus();
+    }
+  });
+
+  joinbtn.addEventListener("click", () => {
+    const room = document.getElementById("txtemail").value.trim();
+
+    if (!room) return alert("Enter room name");
+
+    roomName = room;
+    socket.emit("join-room", roomName);
+
+    alert(`Joined room: ${roomName}`);
+  });
+
+  // MEDIA PREVIEW
+  mediaInput.addEventListener("change", () => {
+    const file = mediaInput.files[0];
+    if (!file) return;
+
+    const url = URL.createObjectURL(file);
+
+    let html = "";
+
+    if (file.type.startsWith("image")) {
+      html = `<img src="${url}" />`;
+    } else if (file.type.startsWith("video")) {
+      html = `<video controls><source src="${url}"></video>`;
+    } else {
+      html = `📄 ${file.name}`;
+    }
+
+    previewBox.style.display = "block";
+    previewBox.innerHTML = `
+      ${html}
+      <br>
+      <button id="cancelPreview">Cancel</button>
     `;
-          } else {
-            html = `
-      📄 ${file.name}
-    `;
-          }
 
-          previewBox.style.display = "block";
+    document.getElementById("cancelPreview").onclick = () => {
+      mediaInput.value = "";
+      previewBox.innerHTML = "";
+      previewBox.style.display = "none";
+    };
+  });
 
-          previewBox.innerHTML = `
-    ${html}
-    <br>
-    <button id="cancelPreview">Cancel</button>
-  `;
+  // SEND MESSAGE
+  chatForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-          // cancel preview
-          document.getElementById("cancelPreview").onclick = () => {
-            mediaInput.value = "";
+    if (!roomName) return alert("Join room first");
 
-            previewBox.innerHTML = "";
+    const message = messageInput.value.trim();
+    const file = mediaInput.files[0];
 
-            previewBox.style.display = "none";
-          };
-        });
-        // JOIN ROOM
-        joinbtn.addEventListener("click", () => {
-          const email = document.getElementById("txtemail").value.trim();
+    if (message) {
+      socket.emit("personal_message", {
+        roomName,
+        message,
+        userId,
+      });
+    }
 
-          if (!email) {
-            return alert("Enter room name");
-          }
+    if (file) {
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
 
-          roomName = email;
-
-          socket.emit("join-room", roomName);
-
-          alert(`Joined room: ${roomName}`);
-        });
-
-        // SEND MESSAGE
-        chatForm.addEventListener("submit", async (e) => {
-          e.preventDefault();
-
-          if (!roomName) {
-            return alert("Please join room first");
-          }
-
-          const message = messageInput.value.trim();
-
-          const file = mediaInput.files[0];
-
-          // TEXT MESSAGE
-          if (message) {
-            socket.emit("personal_message", {
-              roomName,
-
-              message,
-
-              userId,
-            });
-          }
-
-          // MEDIA MESSAGE
-          if (file) {
-            try {
-              const formData = new FormData();
-
-              // IMPORTANT FIX
-              formData.append("file", file);
-              const res = await axios.post(
-                `${API_BASE_URL}/chat-app/media-share`,
-                formData,
-                {
-                  headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "multipart/form-data",
-                  },
-                },
-              );
-
-              const mediaUrl = res.data.mediaUrl;
-
-              socket.emit("personal_message", {
-                roomName,
-                message: "",
-                mediaUrl,
-                mediaType: getMediaType(file.type),
-                userId,
-              });
-              previewBox.innerHTML = "";
-              previewBox.style.display = "none";
-            } catch (err) {
-              console.log(err);
-
-              alert("Media upload failed");
-            }
-          }
-
-          messageInput.value = "";
-
-          mediaInput.value = "";
-        });
-
-        // RECEIVE MESSAGE
-        socket.on("receive_message", (msg) => {
-          appendMessage(msg);
-        });
-
-        // LOAD MESSAGES
-        async function loadMessages() {
-          try {
-            const response = await axios.get(
-              `${API_BASE_URL}/chat-app/get-chats`,
-
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
-              },
-            );
-
-            chatBody.innerHTML = "";
-
-            response.data.data.forEach((msg) => {
-              appendMessage(msg);
-            });
-          } catch (err) {
-            console.log(err);
-          }
-        }
-
-        // APPEND MESSAGE
-        function appendMessage(msg) {
-          const div = document.createElement("div");
-
-          const isMe = Number(msg.userId) === Number(userId);
-
-          div.classList.add("message", isMe ? "sent" : "received");
-
-          let content = "";
-
-          // IMAGE
-          if (msg.mediaType === "image") {
-            content = `
-        <img src="${msg.mediaUrl}" />
-      `;
-          }
-
-          // VIDEO
-          else if (msg.mediaType === "video") {
-            content = `
-        <video controls>
-          <source src="${msg.mediaUrl}">
-        </video>
-      `;
-          }
-
-          // AUDIO
-          else if (msg.mediaType === "audio") {
-            content = `
-        <audio controls>
-          <source src="${msg.mediaUrl}">
-        </audio>
-      `;
-          }
-
-          // DOCUMENT
-          else if (msg.mediaType === "document") {
-            content = `
-        📄
-        <a href="${msg.mediaUrl}" target="_blank">
-          Download File
-        </a>
-      `;
-          }
-
-          // TEXT
-          else {
-            content = escapeHTML(msg.message || "");
-          }
-
-          const time = new Date(msg.createdAt || Date.now()).toLocaleTimeString(
-            [],
-            {
-              hour: "2-digit",
-
-              minute: "2-digit",
+        const res = await axios.post(
+          `${API_BASE_URL}/chat-app/media-share`,
+          formData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "multipart/form-data",
             },
-          );
+          }
+        );
 
-          div.innerHTML = `
+        const mediaUrl = res.data.mediaUrl;
+
+        socket.emit("personal_message", {
+          roomName,
+          message: "",
+          mediaUrl,
+          mediaType: getMediaType(file.type),
+          userId,
+        });
+
+        previewBox.innerHTML = "";
+        previewBox.style.display = "none";
+      } catch (err) {
+        console.log(err);
+        alert("Media upload failed");
+      }
+    }
+
+    messageInput.value = "";
+    mediaInput.value = "";
+    suggestBox.innerHTML = "";
+  });
+
+  socket.on("receive_message", appendMessage);
+
+  async function loadMessages() {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/chat-app/get-chats`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      chatBody.innerHTML = "";
+      response.data.data.forEach(appendMessage);
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  loadMessages();
+
+
+
+socket.on("typing", (data) => {
+  userTyping.textContent = `${data.username} is typing...`;
+  userTyping.style.display = "block";
+});
+
+socket.on("stop-typing", (data) => {
+  userTyping.textContent = "";
+  userTyping.style.display = "none";
+});
+
+  function appendMessage(msg) {
+    const div = document.createElement("div");
+
+    const isMe = Number(msg.userId) === Number(userId);
+
+    div.classList.add("message", isMe ? "sent" : "received");
+
+    let content = "";
+
+    if (msg.mediaType === "image") {
+      content = `<img src="${msg.mediaUrl}" />`;
+    } else if (msg.mediaType === "video") {
+      content = `<video controls><source src="${msg.mediaUrl}"></video>`;
+    } else if (msg.mediaType === "audio") {
+      content = `<audio controls><source src="${msg.mediaUrl}"></audio>`;
+    } else if (msg.mediaType === "document") {
+      content = `📄 <a href="${msg.mediaUrl}" target="_blank">Download</a>`;
+    } else {
+      content = escapeHTML(msg.message || "");
+    }
+
+    const time = new Date(
+      msg.createdAt || Date.now()
+    ).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    div.innerHTML = `
       ${content}
       <span class="timestamp">${time}</span>
     `;
 
-          chatBody.appendChild(div);
+    chatBody.appendChild(div);
+    chatBody.scrollTop = chatBody.scrollHeight;
+  }
 
-          chatBody.scrollTop = chatBody.scrollHeight;
-        }
+  function getMediaType(type) {
+    if (type.startsWith("image")) return "image";
+    if (type.startsWith("video")) return "video";
+    if (type.startsWith("audio")) return "audio";
+    return "document";
+  }
 
-        // MEDIA TYPE HELPER
-        function getMediaType(type) {
-          if (type.startsWith("image")) {
-            return "image";
-          }
-
-          if (type.startsWith("video")) {
-            return "video";
-          }
-
-          if (type.startsWith("audio")) {
-            return "audio";
-          }
-
-          return "document";
-        }
-
-        // XSS PROTECTION
-        function escapeHTML(str) {
-          return str
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
-        }
-      });
-    </script>
+  function escapeHTML(str) {
+    return str
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+});
+</script>
   </body>
 </html>
